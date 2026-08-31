@@ -1,0 +1,526 @@
+openapi: 3.1.0
+info:
+  description: A simple REST-API to access a Cloud-HSM
+  title: HSM Service
+  version: 0.0.1
+servers:
+- description: A simple REST-API to access a Cloud-HSM
+  url: http://localhost:8080/se/api
+paths:
+  /hsms:
+    get:
+      operationId: getHSMList
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/HSM"
+                type: array
+          description: The HSM list
+      summary: Get a list of HSMs
+  /hsms/{hsmId}:
+    get:
+      operationId: getHSM
+      parameters:
+      - explode: false
+        in: path
+        name: hsmId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HSM"
+          description: The HSM resource
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: HSM not found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unexpected error
+      summary: Get the HSM resource
+  /hsms/{hsmId}/keys:
+    get:
+      operationId: getKeysForHSM
+      parameters:
+      - explode: false
+        in: path
+        name: hsmId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Key"
+                type: array
+          description: The list of keys
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: HSM not found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unexpected error
+      summary: List all keys for the given HSM
+  /hsms/{hsmId}/keys/{keyId}:
+    get:
+      operationId: getKeyForHSM
+      parameters:
+      - explode: false
+        in: path
+        name: hsmId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: keyId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Key"
+          description: The key resource
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: HSM or key not found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unexpected error
+      summary: Get the key resource
+  /keydomains:
+    get:
+      operationId: getKeyDomainList
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/KeyDomain"
+                type: array
+          description: The key domain list
+      summary: Get a list of key domains
+  /keydomains/{kdId}:
+    get:
+      operationId: getKeyDomain
+      parameters:
+      - explode: false
+        in: path
+        name: kdId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyDomain"
+          description: The key domain resource
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Key domain not found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unexpected error
+      summary: Get the key domain resource
+  /keydomains/{kdId}/keys:
+    get:
+      operationId: getKeysForKeyDomain
+      parameters:
+      - explode: false
+        in: path
+        name: kdId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Key"
+                type: array
+          description: The list of keys
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Key domain not found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unexpected error
+      summary: List all keys for the given key domain
+  /keydomains/{kdId}/keys/{keyId}:
+    get:
+      operationId: getKeyForKeyDomain
+      parameters:
+      - explode: false
+        in: path
+        name: kdId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: keyId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Key"
+          description: The key resource
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Key domain or key not found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unexpected error
+      summary: Get the key resource
+  /keys:
+    get:
+      operationId: getKeyList
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/Key"
+                type: array
+          description: The key list
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unexpected error
+      summary: Get a list of keys
+  /keys/{keyId}:
+    get:
+      operationId: getKey
+      parameters:
+      - explode: false
+        in: path
+        name: keyId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Key"
+          description: The key resource
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Key not found
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+          description: Unexpected error
+      summary: Get the key resource
+  /keys/{keyId}/signhash:
+    post:
+      operationId: signHash
+      parameters:
+      - explode: false
+        in: path
+        name: keyId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignatureInput"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignatureResult"
+          description: Signature created
+      summary: Perform a signing operation
+components:
+  schemas:
+    Error:
+      example:
+        code: code
+        message: message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+      - code
+      - message
+    KeyType:
+      enum:
+      - RSA
+      - EC
+      - AES
+      type: string
+    KeyAlgorithm:
+      enum:
+      - RSA_PSS
+      - RSA_PSS_SHA1
+      - RSA_PSS_SHA256
+      - RSA_PSS_SHA512
+      - ECDSA
+      - ECDSA_SHA1
+      - ECDSA_SHA256
+      - ECDSA_SHA384
+      - ECDSA_SHA512
+      - DEFAULT_SIGN
+      - CBC_ENC
+      - CBC_DEC
+      - CMAC
+      - WRAP
+      - DERIVE_SP800_56C
+      type: string
+    Key:
+      example:
+        hsms:
+        - hsms
+        - hsms
+        algorithms:
+        - RSA_PSS
+        - RSA_PSS
+        size: 0
+        keyDomain: keyDomain
+        cert: cert
+        id: id
+        label: label
+        type: RSA
+        keyUseCounter: 6
+        pubkey: pubkey
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        type:
+          $ref: "#/components/schemas/KeyType"
+        size:
+          format: int32
+          type: integer
+        keyUseCounter:
+          format: int32
+          type: integer
+        algorithms:
+          items:
+            $ref: "#/components/schemas/KeyAlgorithm"
+          type: array
+        keyDomain:
+          type: string
+        cert:
+          type: string
+        pubkey:
+          type: string
+        hsms:
+          items:
+            type: string
+          type: array
+      required:
+      - id
+      - label
+      - size
+      - type
+    KeyDomain:
+      example:
+        hsms:
+        - hsms
+        - hsms
+        keys:
+        - hsms:
+          - hsms
+          - hsms
+          algorithms:
+          - RSA_PSS
+          - RSA_PSS
+          size: 0
+          keyDomain: keyDomain
+          cert: cert
+          id: id
+          label: label
+          type: RSA
+          keyUseCounter: 6
+          pubkey: pubkey
+        - hsms:
+          - hsms
+          - hsms
+          algorithms:
+          - RSA_PSS
+          - RSA_PSS
+          size: 0
+          keyDomain: keyDomain
+          cert: cert
+          id: id
+          label: label
+          type: RSA
+          keyUseCounter: 6
+          pubkey: pubkey
+        id: id
+        label: label
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        hsms:
+          items:
+            type: string
+          type: array
+        keys:
+          items:
+            $ref: "#/components/schemas/Key"
+          type: array
+      required:
+      - hsms
+      - id
+      - keys
+    KeyDomainStatus:
+      example:
+        id: id
+        label: label
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+      required:
+      - id
+      - label
+    HSM:
+      example:
+        defaultKeyDomain: defaultKeyDomain
+        keys:
+        - hsms:
+          - hsms
+          - hsms
+          algorithms:
+          - RSA_PSS
+          - RSA_PSS
+          size: 0
+          keyDomain: keyDomain
+          cert: cert
+          id: id
+          label: label
+          type: RSA
+          keyUseCounter: 6
+          pubkey: pubkey
+        - hsms:
+          - hsms
+          - hsms
+          algorithms:
+          - RSA_PSS
+          - RSA_PSS
+          size: 0
+          keyDomain: keyDomain
+          cert: cert
+          id: id
+          label: label
+          type: RSA
+          keyUseCounter: 6
+          pubkey: pubkey
+        id: id
+        keyDomains:
+        - id: id
+          label: label
+        - id: id
+          label: label
+      properties:
+        id:
+          type: string
+        defaultKeyDomain:
+          type: string
+        keyDomains:
+          items:
+            $ref: "#/components/schemas/KeyDomainStatus"
+          type: array
+        keys:
+          items:
+            $ref: "#/components/schemas/Key"
+          type: array
+      required:
+      - defaultKeyDomain
+      - id
+      - keyDomains
+      - keys
+    SignatureInput:
+      example:
+        hash: hash
+        algo: RSA_PSS
+      properties:
+        hash:
+          type: string
+        algo:
+          $ref: "#/components/schemas/KeyAlgorithm"
+      required:
+      - algo
+      - hash
+    SignatureResult:
+      example:
+        signature: signature
+      properties:
+        signature:
+          type: string
+      required:
+      - signature

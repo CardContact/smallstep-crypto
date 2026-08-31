@@ -9,6 +9,7 @@ import (
 
 	// Enable default implementation
 	"go.step.sm/crypto/kms/softkms"
+	_ "go.step.sm/crypto/kms/schsmkms"
 )
 
 // KeyManager is the interface implemented by all the KMS.
