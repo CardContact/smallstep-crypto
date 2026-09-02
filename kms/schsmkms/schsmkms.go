@@ -141,5 +141,8 @@ func (k *SmartCardHSMKMS) CreateKey(req *apiv1.CreateKeyRequest) (*apiv1.CreateK
 }
 
 func (k *SmartCardHSMKMS) CreateSigner(req *apiv1.CreateSignerRequest) (crypto.Signer, error) {
-	return nil, nil
+	if req.SigningKey == "" {
+		return nil, fmt.Errorf("schsmkms: signingKey must not be empty")
+	}
+	return NewSigner(k.client, req.SigningKey)
 }
