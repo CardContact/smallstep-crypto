@@ -118,7 +118,7 @@ func (k *SmartCardHSMKMS) GetPublicKey(req *apiv1.GetPublicKeyRequest) (crypto.P
 	}
 
 	if requestedKey == nil {
-		return nil, fmt.Errorf("schsmkms: no key found for name " + req.Name)
+		return nil, fmt.Errorf("schsmkms: no key found for name %s", req.Name)
 	}
 
 	derBytes, err := base64.StdEncoding.DecodeString(*requestedKey.Pubkey)
@@ -144,5 +144,5 @@ func (k *SmartCardHSMKMS) CreateSigner(req *apiv1.CreateSignerRequest) (crypto.S
 	if req.SigningKey == "" {
 		return nil, fmt.Errorf("schsmkms: signingKey must not be empty")
 	}
-	return NewSigner(k.client, req.SigningKey)
+	return openapi.NewSigner(k.client, req.SigningKey)
 }
