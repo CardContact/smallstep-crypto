@@ -11,16 +11,16 @@ import (
 	"io"
 	"time"
 
-	"go.step.sm/crypto/kms/schsmkms/client"
+	"github.com/CardContact/sc-hsm-cloud-service-go-client"
 )
 
 type Signer struct {
-	client    *client.APIClient
+	client    *openapi.APIClient
 	keyID     string
 	publicKey crypto.PublicKey
 }
 
-func NewSigner(client *client.APIClient, keyID string) (*Signer, error) {
+func NewSigner(client *openapi.APIClient, keyID string) (*Signer, error) {
 	ctx, cancel := defaultContext()
 	defer cancel()
 
@@ -63,16 +63,16 @@ func (s *Signer) Sign(_ io.Reader, digest []byte, opts crypto.SignerOpts) ([]byt
 	ctx, cancel := defaultContext()
 	defer cancel()
 
-	var algo client.KeyAlgorithm
+	var algo openapi.KeyAlgorithm
 	if _, ok := s.publicKey.(*rsa.PublicKey); ok {
 		//if _, ok := opts.(*rsa.PSSOptions); ok {
 		//	algo = client.RSA_PSS
 		//} else {
 		//	algo = client.RSA_PKCS1
 		//}
-		algo = client.RSA_PSS
+		algo = openapi.RSA_PSS
 	} else {
-		algo = client.ECDSA
+		algo = openapi.ECDSA
 		//switch h := opts.HashFunc(); h {
 		//case crypto.SHA256:
 		//	algo = client.ECDSA_SHA256
@@ -86,7 +86,7 @@ func (s *Signer) Sign(_ io.Reader, digest []byte, opts crypto.SignerOpts) ([]byt
 	}
 
 	hash := hex.EncodeToString(digest)
-	signatureInput := client.NewSignatureInput(hash, algo)
+	signatureInput := openapi.NewSignatureInput(hash, algo)
 	//fmt.Println("[SmartCardHSMKMS-Signer-DEBUG] hash " + hash)
 	//fmt.Println("[SmartCardHSMKMS-Signer-DEBUG] algo " + algo)
 

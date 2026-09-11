@@ -142,6 +142,8 @@ github.com/ClickHouse/clickhouse-go-linter v1.2.1 h1:zGEKIyd5YL08ieWG/LOUmlau2Dx
 github.com/ClickHouse/clickhouse-go-linter v1.2.1/go.mod h1:pLorS7ffPTfuUV9M0SJgfHA/h/WQPQUk2FWG9x74cQ4=
 github.com/Djarvur/go-err113 v0.1.1 h1:eHfopDqXRwAi+YmCUas75ZE0+hoBHJ2GQNLYRSxao4g=
 github.com/Djarvur/go-err113 v0.1.1/go.mod h1:IaWJdYFLg76t2ihfflPZnM1LIQszWOsFDh2hhhAVF6k=
+github.com/CardContact/sc-hsm-cloud-service-go-client v0.0.0-20260911122530-772d6040201d h1:ska7wOuwPBm+j9YnvWaP/JqFf3Eb2V5wPwQHVegMwRQ=
+github.com/CardContact/sc-hsm-cloud-service-go-client v0.0.0-20260911122530-772d6040201d/go.mod h1:lSb+KbV4vNEqr2IvHfNCRhId7uI2OYXBmjfSgITgnDI=
 github.com/GoogleCloudPlatform/cloudsql-proxy v0.0.0-20191009163259-e802c2cb94ae/go.mod h1:mjwGPas4yKduTyubHvD1Atl9r1rUq8DfVy+gkVvZ+oo=
 github.com/GoogleCloudPlatform/confidential-space/server v0.0.0-20260522213940-e5c6d01a3007 h1:DoeEFwEGBdqcawmpiWtSsSVVZ+wk3zpqvcvssO2JLmY=
 github.com/GoogleCloudPlatform/confidential-space/server v0.0.0-20260522213940-e5c6d01a3007/go.mod h1:s8F0JYEods/WL03WxZaGsWCnumZeeLD+WKHzspOV9u0=

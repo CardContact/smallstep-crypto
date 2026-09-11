@@ -1,4 +1,3 @@
-
 package schsmkms
 
 import (
@@ -8,16 +7,17 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"fmt"
-	"net/url"
 	"net/http"
+	"net/url"
 	"os"
+
+	"github.com/CardContact/sc-hsm-cloud-service-go-client"
 	"go.step.sm/crypto/kms/apiv1"
-	"go.step.sm/crypto/kms/schsmkms/client"
 )
 
 type SmartCardHSMKMS struct {
-	client *client.APIClient
-	hsmId string
+	client *openapi.APIClient
+	hsmId  string
 }
 
 func New(_ context.Context, opts apiv1.Options) (*SmartCardHSMKMS, error) {
@@ -42,15 +42,15 @@ func New(_ context.Context, opts apiv1.Options) (*SmartCardHSMKMS, error) {
 		return nil, fmt.Errorf("schsmkms: 'uri' must contain the url of the sc-hsm-cloud-service e.g. '?url=https://localhost:8443/se/api'")
 	}
 
-	cfg := client.NewConfiguration()
-	cfg.Servers = client.ServerConfigurations {
+	cfg := openapi.NewConfiguration()
+	cfg.Servers = openapi.ServerConfigurations{
 		{
-			URL: serviceURL,
+			URL:         serviceURL,
 			Description: "URL of the SmartCard-HSM Cloud Service",
 		},
 	}
 
-	tlsConfig := &tls.Config {
+	tlsConfig := &tls.Config{
 		MinVersion: tls.VersionTLS13,
 	}
 
@@ -72,16 +72,16 @@ func New(_ context.Context, opts apiv1.Options) (*SmartCardHSMKMS, error) {
 		tlsConfig.Certificates = []tls.Certificate{cert}
 	}
 
-	transport := &http.Transport {
+	transport := &http.Transport{
 		TLSClientConfig: tlsConfig,
 	}
-	httpClient := &http.Client {
+	httpClient := &http.Client{
 		Transport: transport,
 	}
 
 	cfg.HTTPClient = httpClient
 
-	apiClient := client.NewAPIClient(cfg)
+	apiClient := openapi.NewAPIClient(cfg)
 
 	return &SmartCardHSMKMS{apiClient, hsmId}, nil
 }
@@ -110,7 +110,7 @@ func (k *SmartCardHSMKMS) GetPublicKey(req *apiv1.GetPublicKeyRequest) (crypto.P
 	}
 	defer httpRsp.Body.Close()
 
-	var requestedKey *client.Key
+	var requestedKey *openapi.Key
 	for _, key := range keys {
 		if key.Label == req.Name || key.Id == req.Name {
 			requestedKey = &key
