@@ -10,7 +10,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.1
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.14.1
 	github.com/Azure/azure-sdk-for-go/sdk/security/keyvault/azkeys v1.5.0
-	github.com/CardContact/sc-hsm-cloud-service-go-client v0.0.0-20260911122530-772d6040201d
+	github.com/CardContact/sc-hsm-cloud-service-go-client v0.0.0-20260911130827-670bed86e9b9
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/ThalesGroup/crypto11 v1.6.2
 	github.com/aws/aws-sdk-go-v2/config v1.33.4
