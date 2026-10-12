@@ -17,12 +17,10 @@ import (
 
 type SmartCardHSMKMS struct {
 	client *openapi.APIClient
-	hsmId  string
 }
 
 func New(_ context.Context, opts apiv1.Options) (*SmartCardHSMKMS, error) {
 	var serviceURL string
-	var hsmId string
 	var caCertPath string
 	var clientCertPath string
 	var clientKeyPath string
@@ -31,7 +29,6 @@ func New(_ context.Context, opts apiv1.Options) (*SmartCardHSMKMS, error) {
 		u, err := url.Parse(opts.URI)
 		if err == nil {
 			serviceURL = u.Query().Get("url")
-			hsmId = u.Query().Get("hsm-id")
 			caCertPath = u.Query().Get("ca-cert")
 			clientCertPath = u.Query().Get("cert")
 			clientKeyPath = u.Query().Get("key")
@@ -83,7 +80,7 @@ func New(_ context.Context, opts apiv1.Options) (*SmartCardHSMKMS, error) {
 
 	apiClient := openapi.NewAPIClient(cfg)
 
-	return &SmartCardHSMKMS{apiClient, hsmId}, nil
+	return &SmartCardHSMKMS{apiClient}, nil
 }
 
 func init() {
@@ -99,10 +96,10 @@ func (k *SmartCardHSMKMS) Close() error {
 func (k *SmartCardHSMKMS) GetPublicKey(req *apiv1.GetPublicKeyRequest) (crypto.PublicKey, error) {
 	ctx := context.Background()
 
-	keys, httpRsp, err := k.client.DefaultAPI.GetKeysForHSM(ctx, k.hsmId).Execute()
+	key, httpRsp, err := k.client.DefaultAPI.GetKey(ctx, req.Name).Execute()
 
 	if httpRsp.StatusCode == 404 {
-		return nil, fmt.Errorf("schsmkms: HSM %v not found", k.hsmId)
+		return nil, fmt.Errorf("schsmkms: no key found for name %s", req.Name)
 	}
 
 	if err != nil {
@@ -110,18 +107,11 @@ func (k *SmartCardHSMKMS) GetPublicKey(req *apiv1.GetPublicKeyRequest) (crypto.P
 	}
 	defer httpRsp.Body.Close()
 
-	var requestedKey *openapi.Key
-	for _, key := range keys {
-		if key.Label == req.Name || key.Id == req.Name {
-			requestedKey = &key
-		}
-	}
-
-	if requestedKey == nil {
+	if key == nil {
 		return nil, fmt.Errorf("schsmkms: no key found for name %s", req.Name)
 	}
 
-	derBytes, err := base64.StdEncoding.DecodeString(*requestedKey.Pubkey)
+	derBytes, err := base64.StdEncoding.DecodeString(*key.Pubkey)
 	if err != nil {
 		return nil, fmt.Errorf("schsmkms: Decoding public key failed: %w", err)
 	}
