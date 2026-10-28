@@ -75,7 +75,7 @@ func TestRegistration(t *testing.T) {
 
 	// Valid uri should succeed
 	km, err := fn(context.Background(), apiv1.Options{
-		URI: "schsmkms:?url=http://localhost:8443&hsm-id=test-hsm",
+		URI: "schsmkms:?url=http://localhost:8443",
 	})
 	require.NoError(t, err)
 	require.NotNil(t, km)
@@ -107,7 +107,7 @@ func TestNew(t *testing.T) {
 		{
 			name: "ok basic",
 			opts: apiv1.Options{
-				URI: "schsmkms:?url=https://localhost:8443/se/api&hsm-id=hsm1",
+				URI: "schsmkms:?url=https://localhost:8443/se/api",
 			},
 			wantErr: false,
 		},
@@ -115,7 +115,6 @@ func TestNew(t *testing.T) {
 			name: "ok with ca cert and client cert/key",
 			opts: apiv1.Options{
 				URI: "schsmkms:?url=" + url.QueryEscape("https://localhost:8443/se/api") +
-					"&hsm-id=hsm1" +
 					"&ca-cert=" + url.QueryEscape(caCertPath) +
 					"&cert=" + url.QueryEscape(clientCertPath) +
 					"&key=" + url.QueryEscape(clientKeyPath),
@@ -125,7 +124,9 @@ func TestNew(t *testing.T) {
 		{
 			name: "fail missing service url",
 			opts: apiv1.Options{
-				URI: "schsmkms:?hsm-id=hsm1",
+				URI: "schsmkms:?ca-cert=" + url.QueryEscape(caCertPath) +
+					"&cert=" + url.QueryEscape(clientCertPath) +
+					"&key=" + url.QueryEscape(clientKeyPath),
 			},
 			wantErr: true,
 			errSub:  "'uri' must contain the url of the sc-hsm-cloud-service",
@@ -170,7 +171,7 @@ func TestNew(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.NotNil(t, kms)
-				assert.Equal(t, tt.opts.URI != "" && kms.hsmId == "hsm1", true)
+				assert.Equal(t, tt.opts.URI != "", true)
 			}
 		})
 	}
@@ -211,39 +212,46 @@ func TestSmartCardHSMKMS_GetPublicKey(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/hsms/valid-hsm/keys":
-			keys := []openapi.Key{
-				{
-					Id:     "key-id-1",
-					Label:  "key-label-1",
-					Type:   openapi.EC,
-					Pubkey: &ecPubB64,
-				},
-				{
-					Id:     "key-id-2",
-					Label:  "key-label-2",
-					Type:   openapi.RSA,
-					Pubkey: &rsaPubB64,
-				},
-				{
-					Id:     "key-id-invalid-b64",
-					Label:  "invalid-b64",
-					Type:   openapi.EC,
-					Pubkey: &invalidBase64,
-				},
-				{
-					Id:     "key-id-invalid-der",
-					Label:  "invalid-der",
-					Type:   openapi.EC,
-					Pubkey: &invalidDER,
-				},
+		case "/keys/key-id-ec":
+			key := openapi.Key{
+				Id:     "key-id-ec",
+				Label:  "key-label-ec",
+				Type:   openapi.EC,
+				Pubkey: &ecPubB64,
 			}
 			w.Header().Set("Content-Type", "application/json")
-			_ = json.NewEncoder(w).Encode(keys)
-		case "/hsms/not-found-hsm/keys":
+			_ = json.NewEncoder(w).Encode(key)
+		case "/keys/key-id-rsa":
+			key := openapi.Key{
+				Id:     "key-id-rsa",
+				Label:  "key-label-rsa",
+				Type:   openapi.RSA,
+				Pubkey: &rsaPubB64,
+			}
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(key)
+		case "/keys/key-id-invalid-b64":
+			key := openapi.Key{
+				Id:     "key-id-invalid-b64",
+				Label:  "invalid-b64",
+				Type:   openapi.EC,
+				Pubkey: &invalidBase64,
+			}
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(key)
+		case "/keys/key-id-invalid-der":
+			key := openapi.Key{
+				Id:     "key-id-invalid-der",
+				Label:  "invalid-der",
+				Type:   openapi.EC,
+				Pubkey: &invalidDER,
+			}
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(key)
+		case "/keys/key-id-not-found":
 			w.WriteHeader(http.StatusNotFound)
-			_, _ = w.Write([]byte(`{"message": "HSM not found"}`))
-		case "/hsms/error-hsm/keys":
+			_, _ = w.Write([]byte(`{"message": "key not found"}`))
+		case "/keys/key-id-error":
 			w.WriteHeader(http.StatusInternalServerError)
 			_, _ = w.Write([]byte(`{"message": "Internal Server Error"}`))
 		default:
@@ -254,7 +262,6 @@ func TestSmartCardHSMKMS_GetPublicKey(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		hsmID   string
 		keyName string
 		wantPub crypto.PublicKey
 		wantErr bool
@@ -262,50 +269,37 @@ func TestSmartCardHSMKMS_GetPublicKey(t *testing.T) {
 	}{
 		{
 			name:    "ok match by label (EC)",
-			hsmID:   "valid-hsm",
-			keyName: "key-label-1",
+			keyName: "key-id-ec",
 			wantPub: &ecKey.PublicKey,
 			wantErr: false,
 		},
 		{
 			name:    "ok match by id (RSA)",
-			hsmID:   "valid-hsm",
-			keyName: "key-id-2",
+			keyName: "key-id-rsa",
 			wantPub: &rsaKey.PublicKey,
 			wantErr: false,
 		},
 		{
-			name:    "fail hsm not found (404)",
-			hsmID:   "not-found-hsm",
-			keyName: "key-label-1",
-			wantErr: true,
-			errSub:  "schsmkms: HSM not-found-hsm not found",
-		},
-		{
 			name:    "fail retrieving key list error (500)",
-			hsmID:   "error-hsm",
-			keyName: "key-label-1",
+			keyName: "key-id-error",
 			wantErr: true,
 			errSub:  "schsmkms: Retrieving a key list failed",
 		},
 		{
 			name:    "fail key not found",
-			hsmID:   "valid-hsm",
-			keyName: "unknown-key",
+			keyName: "key-id-not-found",
 			wantErr: true,
-			errSub:  "schsmkms: no key found for name unknown-key",
+			errSub:  "schsmkms: no key found for name key-id-not-found",
 		},
 		{
 			name:    "fail decoding public key",
-			hsmID:   "valid-hsm",
-			keyName: "invalid-b64",
+			keyName: "key-id-invalid-b64",
 			wantErr: true,
 			errSub:  "schsmkms: Decoding public key failed",
 		},
 		{
 			name:    "fail parsing public key",
-			hsmID:   "valid-hsm",
-			keyName: "invalid-der",
+			keyName: "key-id-invalid-der",
 			wantErr: true,
 			errSub:  "schsmkms: Parsing public key failed",
 		},
@@ -314,7 +308,7 @@ func TestSmartCardHSMKMS_GetPublicKey(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			kms, err := New(context.Background(), apiv1.Options{
-				URI: "schsmkms:?url=" + url.QueryEscape(server.URL) + "&hsm-id=" + tt.hsmID,
+				URI: "schsmkms:?url=" + url.QueryEscape(server.URL),
 			})
 			require.NoError(t, err)
 
